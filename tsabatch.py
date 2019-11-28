@@ -1,4 +1,4 @@
-#!env/bin/python
+#!/usr/local/bin/python3
 
 """
 Script for running TSA analyses as batch job.
@@ -110,7 +110,8 @@ def main():
 
     # Sensor ids; global for all collections
     try:
-        with psycopg2.connect(**anls.db_params, connect_timeout=5) as pg_conn:
+        # with psycopg2.connect(**anls.db_params, connect_timeout=5) as pg_conn:
+        with psycopg2.connect("dbname='tsa' user='tsadash' password='jyxT9AaWA884t6c6s9AZ' host='timescaledb' port='5432'", connect_timeout=5) as pg_conn:
             db_sensors = list_db_sensors(pg_conn)
         anls.set_sensor_ids(pairs=db_sensors)
         log.info('Sensor ids from database set successfully')

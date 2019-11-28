@@ -8,10 +8,14 @@
 # or ~/.pgpass file.
 
 # NOTE: not tested extensively with big data sets!
+# dbhost=localhost
+# dbport=7001
+# dbname=tsa
+# dbuser=postgres
 dbhost=localhost
-dbport=7001
+dbport=5432
 dbname=tsa
-dbuser=postgres
+dbuser=tsadash
 months=(
   01
   02
