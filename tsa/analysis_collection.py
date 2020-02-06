@@ -217,7 +217,8 @@ class AnalysisCollection:
                                                       wb_path=wb_path,
                                                       pptx_path=coll_pptx_path,
                                                       pptx_template=PPTX_TEMPLATE_PATH,
-                                                      png_dir=png_dir)
+                                                      png_dir=png_dir,
+                                                      out_base_path=self.out_base_path)
                     log.debug(f'{str(self.collections[cl])} is analyzed')
             except:
                 self.errors.add(

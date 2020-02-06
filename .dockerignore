@@ -15,4 +15,6 @@ data
 analysis
 .gz
 .sql
+*.csv
 database/*.gz
+database/example_data/*.csv

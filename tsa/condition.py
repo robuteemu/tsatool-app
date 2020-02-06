@@ -7,6 +7,7 @@ import logging
 import re
 import pandas
 import psycopg2
+import openpyxl as xl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from .block import Block
@@ -15,7 +16,7 @@ from .utils import to_pg_identifier
 from .utils import eliminate_umlauts
 from .utils import trunc_str
 from matplotlib import rcParams
-from datetime import timedelta
+from datetime import datetime, timedelta
 from collections import OrderedDict
 
 log = logging.getLogger(__name__)
@@ -413,7 +414,7 @@ class Condition:
                     log_add='exception'
                 )
 
-    def fetch_results_from_db(self, pg_conn):
+    def fetch_results_from_db(self, pg_conn, wb):
         """
         Fetch result data from corresponding db view
         to pandas DataFrame, and set summary attribute values
@@ -431,6 +432,39 @@ class Condition:
             )
             return
         df = self.main_df
+
+        # Save rows to a new excel file
+        ws = wb.create_sheet()
+        ws.title = self.site
+
+        headers = {
+                   'A1': 'data_from',
+                   'B1': 'data_until',
+                   'C1': 'value'
+                   }
+        for k, v in headers.items():
+            ws[k] = v
+            ws[k].font = xl.styles.Font(bold=True)
+        
+        r = 3
+        ws.column_dimensions['A'].width = 20
+        ws.column_dimensions['B'].width = 20
+        ws.column_dimensions['C'].width = 20
+        previous_value = ''
+        for row in df.itertuples():
+            vfrom = row.vfrom.timestamp()
+            vfrom = datetime.fromtimestamp(vfrom)
+            vuntil = row.vuntil.timestamp()
+            vuntil = datetime.fromtimestamp(vuntil)
+            ws[f'A{r}'] = vfrom.strftime('%d.%m.%Y %H:%M:%S')
+            ws[f'B{r}'] = vuntil.strftime('%d.%m.%Y %H:%M:%S')
+            if row.master == True:
+                ws[f'C{r}'] = 'Voimassa'
+            if row.master == False:
+                ws[f'C{r}'] = 'Ei voimassa'
+            if row.master == None:
+                ws[f'C{r}'] = 'Ei dataa'
+            r += 1
 
         self.data_from = df['vfrom'].min()
         self.data_until = df['vuntil'].max()

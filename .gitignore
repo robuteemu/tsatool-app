@@ -33,6 +33,7 @@ venv.bak/
 
 .gz
 .sql
+*.csv
 
 analysis
 .vscode

@@ -186,21 +186,27 @@ class CondCollection:
             if self.conditions[cnd].secondary:
                 self.conditions[cnd].create_db_temptable(pg_conn=pg_conn)
 
-    def fetch_all_results(self, pg_conn):
+    def fetch_all_results(self, pg_conn, out_base_path):
         """
         Fetch results
         for all Conditions that have a corresponding view in the database.
         """
         cnd_len = len(self.conditions)
+        wb = xl.Workbook()
+        wb_path = f'{out_base_path}_conditions_by_rows_report.xlsx'
         for i, cnd in enumerate(self.conditions.keys()):
             log.info(f'Fetching {i+1}/{cnd_len}: {str(self.conditions[cnd])} ...')
             try:
-                self.conditions[cnd].fetch_results_from_db(pg_conn=pg_conn)
+                self.conditions[cnd].fetch_results_from_db(pg_conn=pg_conn, wb=wb)
             except:
                 self.conditions[cnd].errors.add(
                     msg='Exception while fetching results, skipping',
                     log_add='exception'
                 )
+        if wb is not None:
+            sheet = wb.get_sheet_by_name('Sheet')
+            wb.remove_sheet(sheet)
+            wb.save(wb_path)
 
     def to_worksheet(self, wb):
         """
@@ -406,7 +412,8 @@ class CondCollection:
                      wb_path=None,
                      pptx_path=None,
                      pptx_template=None,
-                     png_dir=None):
+                     png_dir=None,
+                     out_base_path=''):
         """
         Call necessary methods to run the condition analysis
         and save results to the specified
@@ -432,7 +439,7 @@ class CondCollection:
 
         log.info('Starting to fetch results from database ...')
         starttime = datetime.now()
-        self.fetch_all_results(pg_conn=pg_conn)
+        self.fetch_all_results(pg_conn=pg_conn, out_base_path=out_base_path)
         log.info(f'Results fetched in {str(datetime.now() - starttime)}')
 
         if wb is not None:
